@@ -1,6 +1,6 @@
 import React from 'react'
 
-const Invoices = () => {
+const Peers = () => {
   return (
     <>
                                                  
@@ -15,4 +15,4 @@ const Invoices = () => {
   )
 }
 
-export default Invoices
+export default Peers

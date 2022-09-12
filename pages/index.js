@@ -6,9 +6,13 @@ export default function Home() {
   return (
     <>
       
-      <div>
-        <Layout />
-      </div>
+      
+        <Layout>
+          <div>
+            Overview
+          </div>
+        </Layout>
+      
     </>
   )
 }
