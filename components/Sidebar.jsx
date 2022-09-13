@@ -1,7 +1,8 @@
+import React, {useState, useEffect} from 'react'
+
 import classNames from 'classnames'
 import { useRouter } from "next/router";
 import Link from 'next/link';
-import React, {useState} from 'react'
 import CollapseIcon from './icons/CollapseIcon';
 import Customers from './icons/Customers';
 import Peers from './icons/Peers';
@@ -21,14 +22,48 @@ import DialogTitle from '@mui/material/DialogTitle';
 
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import SideBarProjects from './SidebarProjects';
+
+// export const getStaticProps = async () => {
+//     const res = await fetch('https://jsonplaceholder.typicode.com/posts')
+//     console.log(res, "resuslt")
+//     const data = await res.json();
+  
+//     // console.log(data, "dattaaaa")
+//     return {
+//       props: {projects: data}
+//     }
+//   }
+
+// export const getStaticProps = async () => {
+//     const res = await fetch('./data.json')
+//     console.log(res)
+//     const data = await res;
+
+//     console.log(data, "dattaaaa")
+// }
+
+
+
+
+
+
+
+
 
 const Sidebar = () => {
+
+
+
+
+
+
 
     const [toggleCollapse, setToggleCollapse] = useState(false);
 
     const [isCollapsible, setIsCollapsible] = useState(true);
 
-    const [isDropdown, setIsDropdown] = useState(false);
+    const [isDropdown, setIsDropdown] = useState(true);
     const [visibility, setVisibility] = useState(false);
 
     const [open, setOpen] = React.useState(false);
@@ -147,7 +182,7 @@ const Sidebar = () => {
                         <div className="my-2">
 
                         
-                            <button className={`menu-item w-full font-thin uppercase flex text-gray_cl items-center py-2 px-4  my-1 focus-within:border-0 focus:border-0  transition-colors duration-200 ease-in hover:bg-fuchsia-600 hover:text-white ${toggleCollapse ? "justify-center" : "justify-between"}`} onClick={showDropdown}>
+                            <button className={`menu-item w-full font-thin uppercase flex text-gray_cl items-center py-2 px-4  my-1 focus-within:border-0 focus:border-0 focus-within:outline-none focus:outline-none transition-colors duration-200 ease-in hover:bg-fuchsia-600 hover:text-white ${toggleCollapse ? "justify-center" : "justify-between"}`} onClick={showDropdown}>
                             <span className={`flex items-center ${toggleCollapse ? "justify-center" : "justify-between"} w-6/12`}>
                                 <span className="text-left px-3">
                                 <Withdrawals />
@@ -180,7 +215,7 @@ const Sidebar = () => {
 
                         {!toggleCollapse && (
                             
-                            <div className={`sidebar-dropdown-menu px-4 ${isDropdown ? "show" : " "}`}>
+                            <div className={`sidebar-dropdown-menu  px-4 ${isDropdown ? "show" : " "}`}>
                                 {/* <input type="text"/> */}
                                 {/* <a href="" className="text-gray-800">Add new Project</a> */}
 
@@ -201,42 +236,13 @@ const Sidebar = () => {
                                         </span>
                                             
                                     </div>
-                                    <div className="kt-list-timeline__items">
-                                        <div className="kt-list-timeline__item">
-                                            <span className="kt-list-timeline__badge kt-list-timeline__badge--success"></span>
-                                            <span className="kt-list-timeline__text">12 new users regis</span>
-                                            <span className="kt-list-timeline__time">Just now</span>
-                                        </div>
-                                        <div className="kt-list-timeline__item">
-                                            <span className="kt-list-timeline__badge kt-list-timeline__badge--danger"></span>
-                                            <span className="kt-list-timeline__text">Scheduled system</span>
-                                            <span className="kt-list-timeline__time">14 mins</span>
-                                        </div>
-                                        <div className="kt-list-timeline__item">
-                                            <span className="kt-list-timeline__badge kt-list-timeline__badge--warning"></span>
-                                            <span className="kt-list-timeline__text">New order</span>
-                                            <span className="kt-list-timeline__time">20 mins</span>
-                                        </div>
-                                        <div className="kt-list-timeline__item">
-                                            <span className="kt-list-timeline__badge kt-list-timeline__badge--primary"></span>
-                                            <span className="kt-list-timeline__text">Database server</span>
-                                            <span className="kt-list-timeline__time">1 hr</span>
-                                        </div>
-                                        <div className="kt-list-timeline__item">
-                                            <span className="kt-list-timeline__badge kt-list-timeline__badge--primary"></span>
-                                            <span className="kt-list-timeline__text">Database server</span>
-                                            <span className="kt-list-timeline__time">1 hr</span>
-                                        </div>
-                                        <div className="kt-list-timeline__item">
-                                            <span className="kt-list-timeline__badge kt-list-timeline__badge--primary"></span>
-                                            <span className="kt-list-timeline__text">Database server</span>
-                                            <span className="kt-list-timeline__time">1 hr</span>
-                                        </div>
-                                        
 
-                                        
-                                    </div>
-                                    <button className="text-[#6c7293] text-left flex items-center justify-start text-sm lowercase py-2">See more...</button>
+                                    <SideBarProjects/>
+                                    
+                                    <Link href="/projects">
+                                        <a className="text-[#6c7293] text-left flex items-center justify-start text-sm lowercase py-2">See more...</a>
+                                    </Link>
+                                    
                                 </div>
                                 
                             </div>
@@ -335,5 +341,20 @@ const Sidebar = () => {
     </>
   )
 }
+
+
+export async function getStaticProps() {
+    const res = await fetch('https://jsonplaceholder.typicode.com/posts')
+    const posts = res;
+    
+    return {
+      props: {
+        posts,
+      },
+    }
+  }
+
+
+
 
 export default Sidebar

@@ -18,6 +18,7 @@ body{
 .active .dropdown-active_btn{
   background: rgb(229, 231, 235, 1);
   border: 1px solid rgb(107, 114, 128, 1);
+  color: rgb(17 24 39);;
 }
 
 
@@ -46,6 +47,7 @@ body{
     -webkit-transition: all 0.3s ease;
     transition: all 0.3s ease;
     right: -400px;
+    box-shadow: rgb(0 0 0 / 15%) 0px 4px 12px;
     /* box-shadow: 0px 1px 9px -3px rgb(0 0 0 / 75%); */
 
 }
@@ -305,7 +307,11 @@ nav .menu-item:hover span {
     width: 100%;
     padding: 0 0 0 5px;
     font-size: 0.875rem;
-    color: #6c7293;
+    /* color: #6c7293; */
+    width: 150px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .kt-list-timeline .kt-list-timeline__items .kt-list-timeline__item .kt-list-timeline__time {
@@ -314,7 +320,7 @@ nav .menu-item:hover span {
     vertical-align: middle;
     width: 80px;
     padding: 0 0 0 5px;
-    font-size: 0.9rem;
+    font-size: 0.645rem;
     color: #a7abc3;
 }
 
@@ -337,6 +343,161 @@ nav .menu-item:hover span {
     margin-top: -3.5px;
     border-radius: 100%;
 }
+
+
+.kt-error-v3{
+  height: 100vh;
+  overflow: auto;
+}
+
+
+.kt-error-v3 .kt-error_container .kt-error_number > h1 {
+  font-size: 15.7rem;
+  margin-left: 7.85rem;
+  margin-top: 3.4rem;
+  font-weight: 500;
+  -webkit-text-stroke-width: 0.35rem;
+  -moz-text-stroke-width: 0.35rem;
+  text-stroke-width: 0.35rem;
+  color: #A3DCF0;
+  -webkit-text-stroke-color: white;
+  -moz-text-stroke-color: white;
+  text-stroke-color: white;
+}
+
+.kt-error-v3 .kt-error_container .kt-error_title {
+  margin-left: 7.85rem;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #464457;
+}
+
+.kt-font-light {
+  /* color: #ffffff !important; */
+}
+
+.kt-error-v3 .kt-error_container .kt-error_subtitle {
+  margin-left: 7.85rem;
+  margin-top: 1rem;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #6c7293;
+}
+
+.kt-error-v3 .kt-error_container .kt-error_description {
+  margin-left: 7.85rem;
+  font-size: 1.4rem;
+  font-weight: 500;
+  color: #a7abc3;
+}
+
+.rotate-animation{
+  animation: fadeIn 300ms;
+    -webkit-animation: fadeIn 300ms;
+    -moz-animation: fadeIn 300ms;
+    -o-animation: fadeIn 300ms;
+    -ms-animation: fadeIn 300ms;
+    animation-duration: 4s;
+    animation-delay: 0ms;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+
+
+}
+
+@keyframes rotate {
+  0% { 
+    transform: rotate(0deg); 
+  }
+
+  50%{
+    transform: rotate(90deg); 
+  }
+
+
+  100% { 
+    transform: rotate(0deg); 
+    
+   }
+}
+
+@-moz-keyframes rotate {
+  0% { 
+    transform: rotate(0deg); 
+  }
+
+  50%{
+    transform: rotate(90deg); 
+
+  }
+
+  100% { 
+    transform: rotate(0deg); 
+    
+   }
+}
+
+@-webkit-keyframes rotate {
+  0% { 
+    transform: rotate(0deg); 
+  }
+
+  50%{
+    transform: rotate(90deg); 
+
+  }
+
+
+  100% { 
+    transform: rotate(0deg); 
+    
+   }
+}
+
+@-o-keyframes rotate {
+  0% { 
+    transform: rotate(0deg); 
+  }
+
+  50%{
+    transform: rotate(90deg); 
+
+  }
+
+
+
+  100% { 
+    transform: rotate(0deg); 
+    
+   }
+}
+
+@-ms-keyframes rotate {
+  0% { 
+    transform: rotate(0deg); 
+  }
+
+  50%{
+    transform: rotate(90deg); 
+
+  }
+
+
+
+  100% { 
+    transform: rotate(0deg); 
+    
+   }
+}
+
+
+
+
+
+
+
+
+
 
 
 .scrollbar-change{
