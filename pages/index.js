@@ -1,7 +1,9 @@
 import Head from 'next/head'
 import Layout from '../components/Layout';
 import Sidebar from '../components/Sidebar'
-
+import { useEffect } from 'react';
+import { useRouter } from 'next/router';
+// 
 export const getStaticProps = async () => {
   try{
     const res = await fetch('https://jsonplaceholder.typicode.com/posts')
@@ -26,6 +28,21 @@ export const getStaticProps = async () => {
 
 
 export default function Home({projects}) {
+
+  const router = useRouter();
+  useEffect(()=>{
+    const getUser = async ()=>{
+        try{
+
+            if (!localStorage.getItem('trackproject-user')){
+                router.push("/login");
+            } 
+
+        }catch(err){}
+    };
+    getUser()
+}, [])
+
   return (
     <>
       
@@ -47,7 +64,7 @@ export default function Home({projects}) {
                   <div className='grid grid-cols-3 gap-5'>
                     <div className='shadow-sm py-4 px-4 bg-gradient-to-r from-green-500 to-blue-500 text-white flex items-center justify-between rounded h-32'>
                       <div>
-                        Number of Peers
+                        Number of Projects
                       </div>
                       <div className='text-4xl'>
                         45
@@ -66,7 +83,7 @@ export default function Home({projects}) {
 
                     <div className='shadow-sm py-4 px-4  bg-gradient-to-l from-indigo-500 to-red-500 text-white flex items-center justify-between rounded h-32'>
                       <div>
-                        Number of Peers
+                        Total Tasks Completed
                       </div>
                       <div className='text-4xl'>
                         45

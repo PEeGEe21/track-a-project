@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react'
+import React, {useState, useEffect, useContext} from 'react'
 
 import classNames from 'classnames'
 import { useRouter } from "next/router";
@@ -23,6 +23,10 @@ import DialogTitle from '@mui/material/DialogTitle';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import SideBarProjects from './SidebarProjects';
+import AddProjectForm from './forms/AddProjectForm';
+import AppContext from './AppContext';
+import LogOutConfirm from './forms/LogOutConfirm';
+// import AppContext from './AppContext';
 
 // export const getStaticProps = async () => {
 //     const res = await fetch('https://jsonplaceholder.typicode.com/posts')
@@ -52,9 +56,12 @@ import SideBarProjects from './SidebarProjects';
 
 
 const Sidebar = () => {
+    
 
 
-
+    const {item, user, addUser} = useContext(AppContext);
+    // console.log(user, "user in sidebar")
+    
 
 
 
@@ -67,7 +74,14 @@ const Sidebar = () => {
     const [visibility, setVisibility] = useState(false);
 
     const [open, setOpen] = React.useState(false);
+    const [openLogout, setOpenLogout] = React.useState(false);
 
+    const handleLogoutOpen = () => {
+        setOpenLogout(true);
+    };
+    const handleLogoutClose = () => {
+        setOpenLogout(false);
+    };
     const handleClickOpen = () => {
         setOpen(true);
     };
@@ -75,8 +89,20 @@ const Sidebar = () => {
     const handleClose = () => {
         setOpen(false);
     };
+    
 
     const router = useRouter();
+
+
+    const logout = () =>{
+        // if (localStorage.getItem('trackproject-user')) {
+            localStorage.removeItem('trackproject-user')
+            router.push("/login");
+            window.location.reload();
+        //   }
+    }
+
+
     const wrapperClasses = classNames("h-full sidebar pb-4 bg-white flex justify-between shadow-sm scrollbar-change flex-col overflow-y-auto  ", {
         ["w-80"]: !toggleCollapse,
         ["w-20"]: toggleCollapse,
@@ -124,7 +150,7 @@ const Sidebar = () => {
                    
 
                 </div>
-                <nav className="mt-6 md:mt-3 grow">
+                <nav className="mt-6 md:mt-3 grow ">
                     <div className=" flex-wrap">
                         <Link  href="/">
                             <a className={`menu-item w-full font-thin ${router.asPath === "/" && 'bg-fuchsia-600 text-white'} uppercase flex text-gray_cl items-center p-3 px-4  my-2  transition-colors duration-200 ease-in hover:bg-fuchsia-600 hover:text-white  ${toggleCollapse ? "justify-center" : "justify-start"}`}>
@@ -139,7 +165,7 @@ const Sidebar = () => {
                         </a>
                         </Link>
                         <Link href="/peers">
-                            <a className={`menu-item w-full font-thin ${router.asPath === "/invoices" && 'bg-fuchsia-600 text-white'} uppercase flex text-gray_cl items-center p-3 px-4  my-2  transition-colors duration-200 ease-in hover:bg-fuchsia-600 hover:text-white ${toggleCollapse ? "justify-center" : "justify-start"}`}>
+                            <a className={`menu-item w-full font-thin ${router.asPath === "/peers" && 'bg-fuchsia-600 text-white'} uppercase flex text-gray_cl items-center p-3 px-4  my-2  transition-colors duration-200 ease-in hover:bg-fuchsia-600 hover:text-white ${toggleCollapse ? "justify-center" : "justify-start"}`}>
                             <span className="text-left px-3">   
                                 <Peers/>
                             
@@ -206,47 +232,16 @@ const Sidebar = () => {
                                             </svg> */}
                                         {/* </span> */}
 
-                                        <ArrowForwardIosIcon className={`h-3 w-3 transition-all duration-150 ease-in-out  ${isDropdown ? "toggleicon" : " "}`}/>
+                                        <ArrowForwardIosIcon className={`h-3 w-3 forward-icon transition-all duration-150 ease-in-out text-sm ${isDropdown ? "toggleicon" : " "}`}/>
                             </span>
                             )}
 
                             
                         </button>
 
-                        {!toggleCollapse && (
-                            
-                            <div className={`sidebar-dropdown-menu  px-4 ${isDropdown ? "show" : " "}`}>
-                                {/* <input type="text"/> */}
-                                {/* <a href="" className="text-gray-800">Add new Project</a> */}
+                        
+                        <SideBarProjects user={user} isDropdown={isDropdown} toggleCollapse={toggleCollapse} handleClickOpen={handleClickOpen}/>
 
-
-                                
-                                
-                                <div className="kt-list-timeline px-4  mb-3 scrollbar-change overflow-y-auto h-full">
-                                    <div className="py-2 mb-2">
-                                        <span className="text-[#6c7293] text-left flex items-center justify-start text-sm lowercase hover:underline cursor-pointer" onClick={handleClickOpen}>
-                                            <span className="p-2 bg-gray-200 hover:bg-gray-500 rounded-full transition-all duration-100 ease-in flex items-center text-gray-800 justify-center text-xs mr-2" >
-                                                <svg className=' h-2 w-2 ' viewBox="0 0 21 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <path d="M10.5 4.16675V15.8334" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                                                    <path d="M4.66406 10H16.3307" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                                                </svg>
-                                            </span>
-                                            Add new Project
-                                            
-                                        </span>
-                                            
-                                    </div>
-
-                                    <SideBarProjects/>
-                                    
-                                    <Link href="/projects">
-                                        <a className="text-[#6c7293] text-left flex items-center justify-start text-sm lowercase py-2">See more...</a>
-                                    </Link>
-                                    
-                                </div>
-                                
-                            </div>
-                        )}
                         </div>
                         {/* </Link> */}
                         <Link  href="settings/">
@@ -266,9 +261,8 @@ const Sidebar = () => {
                     
                     </div>
                 </nav>
-                <div className="items-end flex">
-                    <Link  href="/logout">
-                       <a className={`menu-item w-full font-thin ${router.asPath === "/logout" && 'bg-fuchsia-600 text-white'} uppercase flex text-gray_cl items-center p-3 px-4  my-2 transition-colors duration-200 ease-in   ${toggleCollapse ? "justify-center" : "justify-start"}`}> 
+                <div className="items-end flex ">
+                       <button className={`menu-item w-full font-thin ${router.asPath === "/logout" && 'bg-fuchsia-600 text-white'} uppercase flex text-gray_cl items-center p-3 px-4  my-2 transition-colors duration-200 ease-in hover:bg-gray-200  ${toggleCollapse ? "justify-center" : "justify-start"}`} onClick={handleLogoutOpen}> 
                            <span className="text-left px-3">   
                         
                             <LogoutIcon/>
@@ -278,8 +272,8 @@ const Sidebar = () => {
                                 Logout
                             </span>
                             )}
-                            </a>
-                        </Link>
+                        </button>
+
 
                         
                 </div>
@@ -303,56 +297,28 @@ const Sidebar = () => {
 
                 
 
-                    <div>
+                    {/* <div> */}
+                        <AddProjectForm handleClose={handleClose} open={open}/>
+
+                        <LogOutConfirm open={openLogout} onClose={handleLogoutClose} logout={logout} />
                     
-                    <Dialog open={open} onClose={handleClose}>
-                        <DialogTitle>Add a Project</DialogTitle>
-                        <DialogContent>
-                        <DialogContentText>
-                            Lorem ipsum dolor sit amet consectetur, adipisicing elit. Illum explicabo eaque delectus ad error deleniti numquam ratione ipsum quae similique.
-                        </DialogContentText>
-                        <TextField
-                            autoFocus
-                            margin="dense"
-                            id="project"
-                            label="Title"
-                            type="text"
-                            fullWidth
-                            variant="standard"
-                        />
-                        <TextField 
-                            multiline
-                            rows={5} 
-                            margin="dense"
-                            id="description"
-                            label="Description"
-                            type="text"
-                            fullWidth
-                            variant="standard"
-                        />
-                        </DialogContent>
-                        <DialogActions>
-                        <Button onClick={handleClose}>Cancel</Button>
-                        <Button onClick={handleClose}>Save</Button>
-                        </DialogActions>
-                    </Dialog>
-                    </div>
+                    {/* </div> */}
 
     </>
   )
 }
 
 
-export async function getStaticProps() {
-    const res = await fetch('https://jsonplaceholder.typicode.com/posts')
-    const posts = res;
+// export async function getStaticProps() {
+//     const res = await fetch('https://jsonplaceholder.typicode.com/posts')
+//     const posts = res;
     
-    return {
-      props: {
-        posts,
-      },
-    }
-  }
+//     return {
+//       props: {
+//         posts,
+//       },
+//     }
+//   }
 
 
 

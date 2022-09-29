@@ -1,34 +1,44 @@
-import React, {useState, useEffect} from 'react'
+import React, {useState, useEffect, useContext} from 'react'
 import { useRouter } from 'next/router';
 import AddIcon from '@mui/icons-material/Add';
 import CloseIcon from '@mui/icons-material/Close';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 import CommentIcon from '@mui/icons-material/Comment';
 import { Badge } from '@mui/material';
-import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
-import Header from '../../components/Header';
 import Layout from '../../components/Layout';
-import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
-import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import AddPeerForm from '../../components/forms/AddPeerForm';
+import AddTaskForm from '../../components/forms/AddTaskForm';
+import axios from 'axios';
+import moment from 'moment'
+import EditProjectForm from '../../components/forms/EditProjectForm';
+import toast, { Toaster } from 'react-hot-toast';
+import DeleteForm from '../../components/forms/DeleteProjectForm';
+import { host } from '../../components/routes';
+import {format} from 'timeago.js'
+import AddCommentForm from '../../components/forms/AddCommentForm';
+import AppContext from "../../components/AppContext";
+import DeleteTaskForm from '../../components/forms/DeleteTaskForm';
 
 
 export const getStaticPaths = async () => {
-    const res = await fetch('https://jsonplaceholder.typicode.com/posts')
+    // try{
+        
+        // http://localhost:5000/api/projects/allProjects
+    // const res = await fetch('http://localhost:5000/api/projects/')
+    const res = await axios.get(`http://localhost:5000/api/projects/`)
+                // console.log(res, "response")
+        // console.log(res)
+
+    // const res = await fetch('https://jsonplaceholder.typicode.com/posts')
     if(res){
-        const data = await res.json();
+        const data = await res.data.projects;
   
-        const paths = data.map(post => {
+        const paths = data.map(project => {
             return {
                 params: {
-                    id: post.id.toString()
+                    id: project._id.toString()
                 }
             }
         })
@@ -39,44 +49,95 @@ export const getStaticPaths = async () => {
 
         }
     }
-    
+    // }catch(err){
+
+    // }
   }
 
 
   export const getStaticProps = async (context) =>{
-    const id = context.params.id;
-    const res = await fetch('https://jsonplaceholder.typicode.com/posts/' + id);
+    try{
+        const id = context.params.id;
+        // const id = (location.pathname.split("/")[3]);
+        // console.log(id)
+        const res = await fetch('http://localhost:5000/api/projects/' + id);
 
-    if(res){
-        const data = await res.json();
+        if(res){
+            const data = await res.json();
 
-        return {
-            props: {post: data}
+            return {
+                props: {post: data.project}
+            }
+
         }
+    }catch(err){
+
     }
-    
-
-
+ 
   }
 
 const Project = ({post}) => {
+    // const id = (location.pathname.split("/")[3]);
+    // console.log(post)
+    const router = useRouter()
+    const {item, user, addUser, numberOfPosts, addNumberOfPosts} = useContext(AppContext);
+
+    const [currentSelected, setCurrentSelected] = useState();
+    const [displayedSelected, setDisplayedSelected] = useState();
+    const [commentInput, setCommentInput] = useState('');
+    const [addBtn, setAddBtn ] = useState(false);
+    const [currentTask, setCurrentTask ] = useState(false);
+    const [currentSelectedTask, setCurrentSelectedTask ] = useState();
+    const [selectedBtn, setSelectedBtn] = useState();
     const [commentSideBar, setCommentSideBar] = useState(false)
+    const [isLoading, setIsLoading] = useState(true);
     const [addProgressDropdown, setAddProgressDropdown] = useState(false)
     const [isPeersDropdown, setIsPeersDropdown] = useState(false)
+    const [taskDropdown, setTaskDropdown] = useState(false)
+    const [tasks, setTasks] = React.useState(false);
+    const [open, setOpen] = React.useState(false);
+    const [peeropen, setPeerOpen] = React.useState(false);
+    const [projectEditForm, setProjectEditForm] = React.useState(false);
+    const [deleteForm, setDeleteForm] = React.useState(false);
+    const [taskDeleteForm, setTaskDeleteForm] = React.useState(false);
+
+
+    const handleDeleteFormOpen = () => {
+        setDeleteForm(true);
+    };
+    const handleDeleteFormClose = () => {
+        setDeleteForm(false);
+    };
+
+
+    const handleTaskDeleteFormOpen = () => {
+        setTaskDeleteForm(true);
+    };
+    const handleTaskDeleteFormClose = () => {
+        setTaskDeleteForm(false);
+    };
+
+
+    
+    const handleEditFormOpen = () => {
+        setProjectEditForm(true);
+    };
+
+    const handleEditFormClose = () => {
+        setProjectEditForm(false);
+    };
+
     const showAddProgressDropdown = () =>{
         setAddProgressDropdown(!addProgressDropdown)
     }
-    const [open, setOpen] = React.useState(false);
-    const [peeropen, setPeerOpen] = React.useState(false);
 
     const handleClickOpen = () => {
         setOpen(true);
     };
-
+    
     const handleClose = () => {
         setOpen(false);
     };
-
 
 
     const handlePeerClickOpen = () => {
@@ -86,28 +147,64 @@ const Project = ({post}) => {
     const handlePeerClose = () => {
         setPeerOpen(false);
     };
+
+
+    
     const showPeersDropdown = () => {
         setIsPeersDropdown(!isPeersDropdown);
     };
 
+    const showTaskDropdown = (id) => {
+        setTaskDropdown(!taskDropdown);
+        setCurrentSelectedTask(id);
 
-    const router = useRouter() 
-
-    // useEffect(() => {
+    };
 
 
 
-            // router.push("/");
-            // router.go(-1); //To back one place
-            // router.go(+1); //To go forward one place
-    // }, [])
+    // onChange={}/> <button className='bg-blue-400 text-white p-3 rounded hover:bg-blue-600 transition duration-200 ease-in-out' onClick={submitComment}
+
+
+    const handleSendComment = async(comment, currenttask) =>{
+        const user_comment = {
+
+            taskId: comment.active_task._id,
+            comment: comment.comment, 
+            user: user._id, 
+        }
+
+        // console.log({user_comment})
+        
+        await axios.post(`${host}/comments/${user_comment.taskId}/comment`, {
+            user_comment
+        });
+    }
+
+
+    useEffect(() => {
+
+        const getTasks = async() =>{
+            const res = await axios.get(`${host}/tasks/${post._id}`);
+            // console.log(res.data.tasks)
+            setTasks(res.data.tasks)
+        }
+        getTasks()
+    }, [tasks])
 
     const goBack =()=>{
         router.back();
     }
-    const goForward =()=>{
-        router.go(1);
-    }
+
+    const changeCurrentTask = (task, index) => {
+        setCommentSideBar(!commentSideBar)
+
+        setCurrentSelected(index);
+        // setDisplayedSelected(index.task);
+        // changeChat(index.user);
+        setCurrentTask(task);
+
+
+    };
 
     return (
 
@@ -123,6 +220,7 @@ const Project = ({post}) => {
                     
                     <button className=" p-1  bg-white text-gray-800 transition ease-in duration-200 text-center font-normal  rounded flex items-center justify-center wrapper relative border border-white hover:bg-gray-200 hover:border-gray-500 hover:border " onClick={goBack}>
                         <ArrowBackIcon />
+                        <span className="tooltip text-[10px]">Back</span>
                             
                     </button>
 
@@ -145,12 +243,12 @@ const Project = ({post}) => {
                             <path d="M12 2C14.5013 4.73835 15.9228 8.29203 16 12C15.9228 15.708 14.5013 19.2616 12 22C9.49872 19.2616 8.07725 15.708 8 12C8.07725 8.29203 9.49872 4.73835 12 2V2Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                         </svg>
                         
-                        {/* <span className="tooltip text-[10px]">Celo explorer</span> */}
+                        <span className="tooltip text-[10px]">Web</span>
                     </button>
 
                     <div className={` relative large-dropdown ${isPeersDropdown ? " active" : ""} `}>
                                 
-                    <button className={` p-2  bg-white transition text-[#6c7293] ease-in duration-200 text-center text-sm font-normal  rounded flex items-center justify-center wrapper relative border border-white hover:bg-gray-200 hover:border-gray-500 hover:border hover:text-[#4A4957] dropdown-active_btn `} onClick={showPeersDropdown}>
+                    <button className={` p-2  bg-white transition text-[#6c7293] ease-in duration-200 text-center text-sm font-normal  rounded flex items-center justify-center wrapper relative border border-white  btn-shake hover:bg-gray-200 hover:border-gray-500 hover:border hover:text-[#4A4957] dropdown-active_btn `} onClick={showPeersDropdown}>
                         <svg  viewBox="0 0 20 20" fill="currentColor" className="h-6 w-6" xmlns="http://www.w3.org/2000/svg">
                             <path d="M7.63411 9.68341C7.60911 9.68341 7.59245 9.68341 7.56745 9.68341C7.52578 9.67508 7.46745 9.67508 7.41745 9.68341C5.00078 9.60841 3.17578 7.70841 3.17578 5.36675C3.17578 2.98341 5.11745 1.04175 7.50078 1.04175C9.88411 1.04175 11.8258 2.98341 11.8258 5.36675C11.8174 7.70841 9.98411 9.60841 7.65911 9.68341C7.65078 9.68341 7.64245 9.68341 7.63411 9.68341ZM7.50078 2.29175C5.80911 2.29175 4.42578 3.67508 4.42578 5.36675C4.42578 7.03341 5.72578 8.37508 7.38411 8.43341C7.43411 8.42508 7.54245 8.42508 7.65078 8.43341C9.28412 8.35841 10.5674 7.01675 10.5758 5.36675C10.5758 3.67508 9.19245 2.29175 7.50078 2.29175Z"/>
                             <path d="M13.784 9.79159C13.759 9.79159 13.734 9.79159 13.709 9.78325C13.3673 9.81659 13.0173 9.57492 12.984 9.23325C12.9506 8.89159 13.159 8.58325 13.5006 8.54159C13.6006 8.53325 13.709 8.53325 13.8006 8.53325C15.0173 8.46659 15.9673 7.46659 15.9673 6.24159C15.9673 4.97492 14.9423 3.94992 13.6756 3.94992C13.334 3.95825 13.0506 3.67492 13.0506 3.33325C13.0506 2.99159 13.334 2.70825 13.6756 2.70825C15.6256 2.70825 17.2173 4.29992 17.2173 6.24992C17.2173 8.16659 15.7173 9.71659 13.809 9.79159C13.8006 9.79159 13.7923 9.79159 13.784 9.79159Z"/>
@@ -204,7 +302,7 @@ const Project = ({post}) => {
                                                     </svg>
                                                 </span>
                                             </button>
-                                            <div className="py-2 mb-2 mt-3 flex items-center justify-center">
+                                            <div className="py-2 mt-3 flex items-center justify-center">
                                                 <span className="text-[#6c7293] text-left flex items-center justify-start text-sm lowercase hover:underline cursor-pointer" onClick={handlePeerClickOpen}>
                                                     <span className="p-2 bg-gray-200 hover:bg-gray-500 rounded-full transition-all duration-100 ease-in flex items-center text-gray-800 justify-center text-xs mr-2" >
                                                         <svg className=' h-2 w-2 ' viewBox="0 0 21 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -229,52 +327,178 @@ const Project = ({post}) => {
                         
                         {/* <span className="tooltip text-[10px]">Celo explorer</span> */}
                     </button>
+                    <button className=" p-2 text-red-500 bg-white transition ease-in duration-200 text-center text-sm font-normal  rounded flex items-center justify-center wrapper relative border border-white  btn-shake hover:bg-gray-200 hover:border-gray-500 hover:border hover:text-red-600" onClick={handleDeleteFormOpen}>
+                    <span>
+                        <svg className="w-6 h-6 " viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M10.5 2.99023C8.835 2.82523 7.16 2.74023 5.49 2.74023C4.5 2.74023 3.51 2.79023 2.52 2.89023L1.5 2.99023" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"></path>
+                            <path d="M4.25 2.485L4.36 1.83C4.44 1.355 4.5 1 5.345 1H6.655C7.5 1 7.565 1.375 7.64 1.835L7.75 2.485" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"></path>
+                            <path d="M9.42422 4.56982L9.09922 9.60482C9.04422 10.3898 8.99922 10.9998 7.60422 10.9998H4.39422C2.99922 10.9998 2.95422 10.3898 2.89922 9.60482L2.57422 4.56982" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"></path>
+                            <path d="M5.16406 8.25H6.82906" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"></path>
+                            <path d="M4.75 6.25H7.25" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round"></path>
+                        </svg>
+                    </span>
+                        
+                        <span className="tooltip text-[10px]">Delete</span>
+                    </button>
+                    <button className={` p-2 text-[#6c7293] bg-white transition ease-in duration-200 text-center text-sm font-normal  rounded flex items-center justify-center wrapper relative border border-white btn-shake hover:bg-gray-200 hover:border-gray-500 hover:border hover:text-[#4A4957  ${projectEditForm === true && 'active-modal'}`} onClick={handleEditFormOpen}>
+                        <img src='/images/Pencil.png' alt="" className=''/>
+                        <span className="tooltip text-[10px]">Edit</span>
+
+                        
+                        {/* <span className="tooltip text-[10px]">Celo explorer</span> */}
+                    </button>
 
 
                 </div>
                     
             </div>
 
-            <div className='pt-8'>
-                <h1 className='text-[45px]'>{post && post.title}</h1>
-                <p className='text-[#6c7293] text-sm '>Added on the 21st August, 2022 at 10:22pm</p>
-                <p className='my-2'>{post && post.body}</p>
+            <div className='mt-8 p-3 bg-white shadow-sm'>
+                <h1 className='text-[45px] capitalize'>{post.title}</h1>
+
+                <p className='text-[#6c7293] text-sm mb-2'>Added on the {moment(post.updatedAt).format('Do MMMM, YYYY')} at {moment(post.updatedAt).format('h:mm a')}</p>
+                {/* <p className='text-[#6c7293] text-sm '>Added on the 21st August, 2022 at 10:22pm</p> */}
+                <p className='text-justify'>{post.description}</p>
             </div>
             
 
+
+{/* {isLoading ? '' : } */}
             <div className='my-8 pt-12'>
-                <div className='grid md:grid-cols-3 grid-cols-1 '>
-                    <div className='px-4 py-3'>
+                <div className='grid lg:grid-cols-3 grid-cols-1 gap-6 '>
+                    <div className=' py-3'>
                     {/* bg-gradient-to-l to-green-400  from-sky-700 */}
                         <div className='p-4 bg-gray-700 flex items-center justify  rounded'>
                            <h3 className=' text-white text-lg grow'>To Do</h3> 
                            
-                           <button onClick={handleClickOpen}>
-                                <AddIcon className="text-gray-800 rounded-full bg-white p-2 h-8 w-8 text-lg"/>
+                           <button onClick={handleClickOpen} className="">
+                                <AddIcon className="text-gray-800 rounded-full bg-white p-2 h-8 w-8 add-icon"/>
+
                            </button>
                            
                         </div>
+                        
+
+
 
                         <div className='mt-5'>
-                            <div className='mb-4 bg-white p-3 border-t-2 border-gray-900 '>
-                                <div className='flex flex-col gap-1 mb-4 relative'>
-                                    <h3 className=' underline text-lg font-bold'>Edit HomePage</h3>
-                                    <span className='text-[#6c7293] text-sm'>Peegee, 3 days ago</span>
+                            {tasks && tasks.map((task, index)=>(
+                                task.status === 1 && (
+                                <>
+                                    <div className='mb-4 bg-white p-3 border-t-2 border-gray-900 shadow-sm ' key={task._id}>
+                                        <div className='flex flex-row justify-between items-start mb-4 relative'>
+                                            <div className='flex flex-col gap-1 relative'>
+                                                <h3 className='underline text-lg font-bold'>{task.title}</h3>
+                                                <span className='text-[#6c7293] text-sm'>
+                                                    <span className='capitalize'>{user.username}</span>, {(format(task.updatedAt))}</span>
+                                            </div>
 
-                                    <span className='absolute right-0 top-0'><MoreHorizIcon/></span>
-                                </div>
-                                <p className='text-justify'>Lorem ipsum dolor sit amet consectetur adipisicing elit. Rerum ab dolorem harum expedita excepturi quia consequatur! Officiis inventore quae eveniet doloremque voluptates quo suscipit possimus, eius sapiente quaerat? Alias, officia.</p>
 
-                                <div className='flex justify-end'>
-                                    <span className='p-2 rounded-full hover:bg-gray-200 cursor-pointer ' onClick={()=>{setCommentSideBar((prev) => !prev)}}>
-                                        <Badge badgeContent={4} color="primary">
-                                            <CommentIcon/>
-                                        </Badge>
-                                        
-                                    </span>
-                                </div>
-                            </div>
-                            <div className='mb-4 bg-white p-3 border-t-2 border-gray-900 '>
+
+
+                                                <div className={`dropdown relative z-50 ${taskDropdown && 
+
+                                                    currentSelectedTask === task._id && 'show' }  `} data-dropdown="">
+                                                    <span className={`cursor-pointer rounded-full hover:bg-gray-200 p-1 h-7 w-7 flex items-center justify-center ${taskDropdown && 
+
+currentSelectedTask === task._id && 'bg-gray-200' }`} onClick={(e)=>showTaskDropdown(task._id)}>
+                                                        <MoreVertIcon className='text-base'/>
+                                                        </span>
+                                                    {taskDropdown && 
+
+                                                    currentSelectedTask === task._id && 
+                                                    
+                                                    <div class="dropdown-menu task-dropdown-menu   border-0 py-3 z-50 min-w-full fade-in bg-neutral50" aria-labelledby="dropdownMenuButton" >
+
+                                                    <div className="dropdown-item flex items-center text-sm justify-start  w-full">
+                                                        <input
+                                                            type="checkbox"
+                                                            className="form-check-input h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer"
+                                                            id="agree_check2"
+                                                            
+                                                        />
+                                                        <label className="form-check-label inline-block text-gray-800 w-full cursor-pointer" htmlFor="agree_check2">In Progress</label>
+                                                    </div>
+                                                    <button class="dropdown-item flex items-center text-sm gap-2 py-2 focus:border-none focus:outline-none focus-visible:border-none focus-visible:outline-none " onClick={handleTaskDeleteFormOpen}>
+                                                        <span>
+                                                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                                <path d="M10.5 2.99023C8.835 2.82523 7.16 2.74023 5.49 2.74023C4.5 2.74023 3.51 2.79023 2.52 2.89023L1.5 2.99023" stroke="#292D32" strokeLinecap="round" strokeLinejoin="round"/>
+                                                                <path d="M4.25 2.485L4.36 1.83C4.44 1.355 4.5 1 5.345 1H6.655C7.5 1 7.565 1.375 7.64 1.835L7.75 2.485" stroke="#292D32" strokeLinecap="round" strokeLinejoin="round"/>
+                                                                <path d="M9.42422 4.56982L9.09922 9.60482C9.04422 10.3898 8.99922 10.9998 7.60422 10.9998H4.39422C2.99922 10.9998 2.95422 10.3898 2.89922 9.60482L2.57422 4.56982" stroke="#292D32" strokeLinecap="round" strokeLinejoin="round"/>
+                                                                <path d="M5.16406 8.25H6.82906" stroke="#292D32" strokeLinecap="round" strokeLinejoin="round"/>
+                                                                <path d="M4.75 6.25H7.25" stroke="#292D32" strokeLinecap="round" strokeLinejoin="round"/>
+                                                            </svg>
+                                                        </span> Delete
+                                                    </button>
+                                                    <button class="dropdown-item flex items-center text-sm gap-2 text-neutral800  py-2">
+                                                        <span>
+                                                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                                <path d="M6.63164 1.80011L2.52663 6.14511C2.37163 6.31011 2.22163 6.63511 2.19163 6.86011L2.00663 8.48011C1.94163 9.06511 2.36163 9.46511 2.94163 9.36511L4.55164 9.09011C4.77664 9.05011 5.09163 8.88511 5.24663 8.71511L9.35164 4.37011C10.0616 3.62011 10.3816 2.76511 9.27664 1.72011C8.17663 0.685108 7.34164 1.05011 6.63164 1.80011Z" stroke="#25252C" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round"/>
+                                                                <path d="M5.94531 2.5249C6.16031 3.9049 7.28031 4.9599 8.67031 5.0999" stroke="#25252C" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round"/>
+                                                                <path d="M1.5 11H10.5" stroke="#25252C" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round"/>
+                                                                </svg>
+                                                        </span> Edit
+                                                    </button>
+                                                    
+                                                    
+                                                </div>
+                                                    
+                                                    }
+                                                </div>
+
+
+
+
+
+
+
+
+
+
+                                        </div>
+                                        <p className='text-justify'>{task.description}</p>
+
+                                        {/* {task.comments.length > 0 &&  */}
+                                        <div className='flex justify-end mt-6'>
+                                            <span className='p-2 rounded-full hover:bg-gray-200 cursor-pointer ' onClick={()=>changeCurrentTask({task, index})}>
+                                                <Badge badgeContent={task.comments.length} color="primary">
+                                                    <CommentIcon className='text-gray-500 hover:text-gray-600 transition duration-150 ease '/>
+                                                </Badge>
+                                                
+                                            </span>
+                                        </div>
+                                        {/* } */}
+                                    </div>
+                                </>
+                                )
+                            ))}
+                            
+                            {/* {post.tasks && post.tasks.map((task)=>(
+                                task.status === 1 && (
+                                <>
+                                    <div className='mb-4 bg-white p-3 border-t-2 border-gray-900 ' key={task._id}>
+                                        <div className='flex flex-col gap-1 mb-4 relative'>
+                                            <h3 className=' underline text-lg font-bold'>{task.title}</h3>
+                                            <span className='text-[#6c7293] text-sm'>Peegee, 3 days ago</span>
+
+                                            <span className='absolute right-0 top-0'><MoreHorizIcon/></span>
+                                        </div>
+                                        <p className='text-justify'>{task.description}</p>
+
+                                        <div className='flex justify-end'>
+                                            <span className='p-2 rounded-full hover:bg-gray-200 cursor-pointer ' onClick={()=>{setCommentSideBar((prev) => !prev)}}>
+                                                <Badge badgeContent={4} color="primary">
+                                                    <CommentIcon/>
+                                                </Badge>
+                                                
+                                            </span>
+                                        </div>
+                                    </div>
+                                </>
+                                )
+                            ))} */}
+                            
+                            {/* <div className='mb-4 bg-white p-3 border-t-2 border-gray-900 '>
                                 <div className='flex flex-col gap-1 mb-4 relative'>
                                     <h3 className=' underline text-lg font-bold'>Edit HomePage2</h3>
                                     <span className='text-[#6c7293] text-sm'>Peegee, 3 days ago</span>
@@ -282,36 +506,33 @@ const Project = ({post}) => {
                                     <span className='absolute right-0 top-0'><MoreHorizIcon/></span>
                                 </div>
                                 <p className='text-justify'>Lorem ipsum dolor sit amet consectetur adipisicing elit. Rerum ab dolorem harum expedita excepturi quia consequatur! Officiis inventore quae eveniet doloremque voluptates quo suscipit possimus, eius sapiente quaerat? Alias, officia.</p>
-                            </div>
+                            </div> */}
                             
                         </div>
                         
                     </div>
 
-                    <div className='px-4 py-3'>
+                    <div className='py-3'>
                     {/* bg-gradient-to-r to-blue-600  from-blue-400 */}
                         <div className='p-4 dropdown bg-gray-700 flex items-center justify rounded'>
                            <h3 className=' text-white text-lg grow'>In Progress</h3> 
                            
                             <div className={`  large-dropdown ${addProgressDropdown ? "active" : ""} `}>
                                 <button onClick={showAddProgressDropdown}>
-                                    <AddIcon className="text-gray-800 rounded-full bg-white p-2 h-8 w-8 text-lg hover:bg-gray-200"/>
+                                    <AddIcon className="text-gray-800 rounded-full bg-white add-icon p-2 h-8 w-8  hover:bg-gray-200"/>
                                 </button>
-                                    <div className={`dropdown-menu large-dropdown px-3 py-3 shadow-box rounded-md w-full h-auto  scrollbar-change border-none ${addProgressDropdown ? "fade-in" : ""}`}>
+                                    <div className={`dropdown-menu large-dropdown px-3 py-2 shadow-box rounded-md w-full h-auto  scrollbar-change border-none ${addProgressDropdown ? "fade-in" : ""}`}>
                                         <div className="">
-                                            <div className=" flex justify-start mt-3 mb-3">
-                                                <input type="checkbox" className="form-check-input h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" id="agree_check"/>
-                                                <label className="form-check-label inline-block text-gray-800 w-full cursor-pointer" htmlFor="agree_check">Edit HomePage</label>
+                                        {tasks && tasks.map((task, index)=>(
+                                            task.status === 1 && (
+                                            <>
+                                            <div className=" flex justify-start mt-2 mb-3 text-sm" key={task._id}>
+                                                <input type="checkbox" className="form-check-input h-3 w-3 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" id={task._id}/>
+                                                <label className="form-check-label inline-block text-gray-800 w-full cursor-pointer" htmlFor={task._id}>{task.title}</label>
                                             </div>
-                                            <div className="form-group form-check flex justify-start mt-3 mb-3 w-full">
-                                                <input
-                                                    type="checkbox"
-                                                    className="form-check-input h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer"
-                                                    id="agree_check2"
-                                                    
-                                                />
-                                                <label className="form-check-label inline-block text-gray-800 w-full cursor-pointer" htmlFor="agree_check2">Edit HomePage2</label>
-                                            </div>
+                                            </>
+                                            )
+                                        ))}
                                         </div>
                                     </div>
                             </div>
@@ -319,28 +540,43 @@ const Project = ({post}) => {
 
                         <div className='mt-5'>
                             
-                            <div className='mb-4 bg-white p-3 border-t-2 border-gray-900 '>
-                                <div className='flex flex-col gap-1 mb-4 relative'>
-                                    <h3 className=' underline text-lg font-bold'>Edit HomePage3</h3>
-                                    <span className='text-[#6c7293] text-sm'>Peegee, 3 days ago</span>
+                        {tasks && tasks.map((task)=>(
+                                task.status === 2 && (
+                                <>
+                                    <div className='mb-4 bg-white p-3 border-t-2 border-gray-900 ' key={task._id}>
+                                        <div className='flex flex-col gap-1 mb-4 relative'>
+                                            <h3 className=' underline text-lg font-bold'>{task.title}</h3>
+                                            <span className='text-[#6c7293] text-sm'>Peegee, 3 days ago</span>
 
-                                    <span className='absolute right-0 top-0'><MoreHorizIcon/></span>
-                                </div>
-                                <p className='text-justify'>Lorem ipsum dolor sit amet consectetur adipisicing elit. Rerum ab dolorem harum expedita excepturi quia consequatur! Officiis inventore quae eveniet doloremque voluptates quo suscipit possimus, eius sapiente quaerat? Alias, officia.</p>
-                            </div>
+                                            <span className='absolute right-0 top-0'><MoreHorizIcon/></span>
+                                        </div>
+                                        <p className='text-justify'>{task.description}</p>
+
+                                        <div className='flex justify-end'>
+                                            <span className='p-2 rounded-full hover:bg-gray-200 cursor-pointer ' onClick={()=>changeCurrentUser({index, task})}>
+                                                <Badge badgeContent={4} color="primary">
+                                                    <CommentIcon/>
+                                                </Badge>
+                                                
+                                            </span>
+                                        </div>
+                                    </div>
+                                </>
+                                )
+                            ))}
                             
                         </div>
                     </div>
 
-                    <div className='px-4 py-3'>
+                    <div className='py-3'>
                     {/* bg-gradient-to-r to-cyan-800 from-blue-400 */}
                         <div className='p-4 bg-gray-700 flex items-center justify rounded '>
                            <h3 className=' text-white text-lg grow'>Completed</h3> 
                            <button>
-                                <AddIcon className="text-gray-800 rounded-full bg-white p-2 h-8 w-8 text-lg"/>
+                                <AddIcon className="text-gray-800 rounded-full bg-white p-2 h-8 w-8 add-icon"/>
                            </button>
                         </div>
-                        <div className='mt-5'>
+                        {/* <div className='mt-5'>
                             <div className='mb-4 bg-white p-3 border-t-2 border-gray-900 '>
                                 <div className='flex flex-col gap-1 mb-4 relative'>
                                     <h3 className=' underline text-lg font-bold'>Edit HomePage4</h3>
@@ -360,25 +596,30 @@ const Project = ({post}) => {
                                 </div>
                             </div>
                             
-                        </div>
+                        </div> */}
                     </div>
 
                 </div>
 
             </div>
+
+
+
+
         </div>
-                        <div className={` commentSideBar px-3 shadow-sm ${commentSideBar ? "show" : ""}`}>
+                        <div className={` commentSideBar px-3 shadow-sm ${commentSideBar ? "show" : ""}`} >
                             <div className='overflow-y-auto h-full no-scrollbar pb-20 px-3'>
 
             
                                 <div className="text-right mt-2  flex items-center justify-end">
-                                    <button className="bg-blue-600 text-white h-8 w-8 flex items-center justify-center rounded-full p-2" onClick={()=>{setCommentSideBar(false)}} ><CloseIcon/></button>
+                                    <button className=" text-gray-800 h-8 w-8 flex items-center justify-center  p-2" onClick={()=>{setCommentSideBar(false)}} ><CloseIcon/></button>
                                 </div>
                                 <div className="py-4">
                                     <div>
                                         <div className='flex flex-col gap-1 mb-4 relative'>
-                                            <h1 className='  text-xl font-bold'>{post.title}</h1>
-                                            <span className='text-[#6c7293] text-sm'>Peegee, 3 days ago</span>
+                                            <h1 className='  text-xl font-bold'>{currentTask && currentTask.task.title}</h1>
+                                            <span className='text-[#6c7293] text-sm'>{currentTask && (format(currentTask.task.updatedAt))}</span>
+                                            <p>{currentTask && currentTask.task._id}</p>
                                         </div>
 
                                         <p className=''>{post.body}</p>
@@ -434,81 +675,22 @@ const Project = ({post}) => {
                                     </div>
                                 </div>
                             </div>
-                            <div className='fixed w-full bottom-0 right-0 bg-gray-100 py-3 px-2 flex justify-between gap-2 z-[1001] h-auto'>     
-                                <input className='border border-gray-400 rounded h-12 focus:outline-none pl-1 grow' type="text" placeholder='Add a comment'/> <button className='bg-blue-400 text-white p-3 rounded hover:bg-blue-600 '>Send</button>
+                            <div className='fixed w-full bottom-0 right-0 bg-gray-100 py-3 px-2 flex justify-between gap-2 z-[1001] h-auto'>
+                                     
+                                <AddCommentForm active_task={currentTask && currentTask.task} handleSendComment={handleSendComment}/>
                             </div>
                         </div>
 
-                    <div>
+                    <AddTaskForm open={open} onClose={handleClose} projectId={post._id} projectName={post.title}/>
                     
-                        <Dialog open={open} onClose={handleClose}>
-                            <DialogTitle>Add a Task</DialogTitle>
-                            <DialogContent>
-                            {/* <DialogContentText>
-                                Lorem ipsum dolor sit amet consectetur, adipisicing elit. Illum explicabo eaque delectus ad error deleniti numquam ratione ipsum quae similique.
-                            </DialogContentText> */}
-                            <TextField
-                                autoFocus
-                                margin="dense"
-                                id="project"
-                                label="Title"
-                                type="text"
-                                fullWidth
-                                variant="outlined"
-                            />
-                            <TextField 
-                                multiline
-                                rows={5} 
-                                margin="dense"
-                                id="description"
-                                label="Description"
-                                type="text"
-                                fullWidth
-                                variant="outlined"
-                            />
-                            </DialogContent>
-                            <DialogActions>
-                            <Button onClick={handleClose}>Cancel</Button>
-                            <Button onClick={handleClose}>Add</Button>
-                            </DialogActions>
-                        </Dialog>
-                    </div>
+                    
+                    <EditProjectForm open={projectEditForm} onClose={handleEditFormClose} projectId={post._id} projectName={post.title} projectDesc={post.description}/>
 
-                    <div>
-                                        
-                    <Dialog open={peeropen} onClose={handlePeerClose}>
-                        <DialogTitle>Add a Peer</DialogTitle>
-                        <DialogContent>
-                        <DialogContentText>
-                            Send a request to a Peer to join this Project. Lorem ipsum dolor sit amet consectetur, adipisicing elit. Odit, a beatae. Rem obcaecati dolorum iusto!
-                        </DialogContentText>
-                        <TextField
-                            autoFocus
-                            margin="dense"
-                            id="email"
-                            label="Email"
-                            type="email"
-                            fullWidth
-                            variant="standard"
-                        />
+                    <AddPeerForm open={peeropen} onClose={handlePeerClose} />
 
-                        <span>Or</span>
-
-                        <TextField 
-                            margin="dense"
-                            id="username"
-                            label="Username"
-                            type="text"
-                            fullWidth
-                            variant="standard"
-                        />
-                        </DialogContent>
-                        <DialogActions>
-                        <Button onClick={handlePeerClose}>Cancel</Button>
-                        <Button onClick={handlePeerClose}>Send</Button>
-                        </DialogActions>
-                    </Dialog>
-                    </div>
+                    <DeleteForm open={deleteForm} onClose={handleDeleteFormClose} projectId={post._id} projectName={post.title}/>
+                    <DeleteTaskForm open={taskDeleteForm} onClose={handleTaskDeleteFormClose} task={currentSelectedTask} projectId={post._id} projectName={post.title}/>
+                    
         </div>
     </Layout>
   )
